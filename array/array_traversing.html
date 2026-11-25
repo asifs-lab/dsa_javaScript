@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Array Traversing</title>
+  </head>
+  <body>
+    <input type="text" id="element" />
+    <button onclick="getElement()">Get Element</button>
+
+    <script>
+      let data = [9, 45, 2, 8, 3, 46, 56, 77, 23, 1, 34];
+
+      //   for (let i = 0; i < data.length; i++) {
+      //     console.log("array " + i + " element is :" + data[i]);
+      //   }
+
+      function getElement() {
+        let index = document.getElementById("element").value;
+
+        if (index < 0) {
+          alert("Don't enter negative value !!");
+        } else if (index < data.length && typeof parseInt(index) === "number") {
+          alert(data[index]);
+        } else {
+          alert("Please enter valid input.");
+        }
+      }
+    </script>
+  </body>
+</html>
