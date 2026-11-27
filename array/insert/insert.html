@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Array Insert</title>
+  </head>
+  <body>
+    <script>
+      let name = ["Rakib", "Ridoy", "Shifat", "Asif"];
+      let newName = "Motaleb";
+      let position = 4;
+
+      if (position == name.length) {
+        name[position] = newName;
+        document.write(name);
+      } else if (position > name.length) {
+        document.write("Wrong input");
+      } else {
+        for (let i = name.length - 1; i >= 0; i--) {
+          if (i >= position) {
+            name[i + 1] = name[i];
+            if (i == position) {
+              name[i] = newName;
+            }
+          }
+        }
+        document.write(name);
+      }
+    </script>
+  </body>
+</html>

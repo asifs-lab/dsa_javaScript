@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Duplicate বাদ দেওয়ার অ্যানিমেশন</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #fff;
+        --text: #1b2433;
+        --mute: #5d6b82;
+        --line: #d8dfeb;
+        --cur: #2f6fed;
+        --cmp: #e8a317;
+        --ok: #1f9d6b;
+        --bad: #d64545;
+        --hl: #fff3c4;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #10151f;
+          --card: #1a2231;
+          --text: #e8edf6;
+          --mute: #9aa8c0;
+          --line: #2c374b;
+          --cur: #6b9bff;
+          --cmp: #f0b93a;
+          --ok: #3fcf98;
+          --bad: #ff7b7b;
+          --hl: #4a4020;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #10151f;
+        --card: #1a2231;
+        --text: #e8edf6;
+        --mute: #9aa8c0;
+        --line: #2c374b;
+        --cur: #6b9bff;
+        --cmp: #f0b93a;
+        --ok: #3fcf98;
+        --bad: #ff7b7b;
+        --hl: #4a4020;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Hind Siliguri", system-ui, sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin: 0 0 4px;
+      }
+      p.sub {
+        margin: 0 0 18px;
+        color: var(--mute);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+      }
+      .lab {
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        min-height: 74px;
+        align-items: flex-start;
+      }
+      .cell {
+        width: 54px;
+        text-align: center;
+      }
+      .box {
+        height: 46px;
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        transition: all 0.25s;
+      }
+      .idx {
+        font-size: 0.8rem;
+        color: var(--mute);
+        margin-top: 2px;
+      }
+      .box.cur {
+        border-color: var(--cur);
+        background: color-mix(in srgb, var(--cur) 18%, transparent);
+      }
+      .box.cmp {
+        border-color: var(--cmp);
+        background: color-mix(in srgb, var(--cmp) 22%, transparent);
+      }
+      .box.match {
+        border-color: var(--bad);
+        background: color-mix(in srgb, var(--bad) 22%, transparent);
+      }
+      .box.added {
+        border-color: var(--ok);
+        background: color-mix(in srgb, var(--ok) 22%, transparent);
+      }
+      .box.empty {
+        border-style: dashed;
+        color: var(--mute);
+        font-weight: 400;
+      }
+      .vars {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        font-size: 0.95rem;
+      }
+      .vars b {
+        color: var(--cur);
+      }
+      #msg {
+        font-size: 1.05rem;
+        min-height: 3.2em;
+        margin: 0;
+      }
+      pre {
+        margin: 0;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        font-size: 0.88rem;
+        overflow-x: auto;
+      }
+      .ln {
+        display: block;
+        padding: 1px 8px;
+        border-radius: 4px;
+        white-space: pre;
+      }
+      .ln.on {
+        background: var(--hl);
+        font-weight: 700;
+      }
+      .ctl {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      button {
+        font: inherit;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button.p {
+        background: var(--cur);
+        border-color: var(--cur);
+        color: #fff;
+      }
+      button:focus-visible {
+        outline: 3px solid var(--cmp);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .key {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: var(--mute);
+      }
+      .key i {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 4px;
+        vertical-align: -1px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .box {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Duplicate বাদ দেওয়ার অ্যানিমেশন</h1>
+      <p class="sub">
+        “পরের ধাপ” চাপো আর দেখো কোড কীভাবে একটা একটা করে কাজ করছে।
+      </p>
+
+      <div class="ctl">
+        <button id="prev">আগের ধাপ</button>
+        <button id="next" class="p">পরের ধাপ</button>
+        <button id="auto">অটো প্লে</button>
+        <button id="reset">আবার শুরু</button>
+      </div>
+
+      <div class="card"><p id="msg"></p></div>
+
+      <div class="card">
+        <div class="lab">arr (মূল array)</div>
+        <div class="row" id="arr"></div>
+      </div>
+
+      <div class="card">
+        <div class="lab">newArr (নতুন array, duplicate ছাড়া)</div>
+        <div class="row" id="nw"></div>
+        <div class="vars" id="vars"></div>
+      </div>
+
+      <div class="card">
+        <div class="lab">কোড (যে লাইন চলছে সেটা হলুদ)</div>
+        <pre id="code"></pre>
+      </div>
+
+      <div class="key">
+        <span><i style="background: var(--cur)"></i>এখন যেটা তুলেছি</span>
+        <span><i style="background: var(--cmp)"></i>যার সাথে মেলাচ্ছি</span>
+        <span><i style="background: var(--bad)"></i>মিলে গেছে (duplicate)</span>
+        <span><i style="background: var(--ok)"></i>নতুন যোগ হলো</span>
+      </div>
+    </main>
+
+    <script>
+      var arr = [10, 20, 20, 10, 30, 30, 40, 50, 60];
+      var codeLines = [
+        "for (let i = 0; i < arr.length; i++) {",
+        "  let isDuplicate = false;",
+        "  for (let j = 0; j < newArr.length; j++) {",
+        "    if (arr[i] == newArr[j]) {",
+        "      isDuplicate = true;",
+        "      break;",
+        "    }",
+        "  }",
+        "  if (isDuplicate == false) {",
+        "    newArr[newArr.length] = arr[i];",
+        "  }",
+        "}",
+        "document.write(newArr);",
+      ];
+      var steps = [];
+      (function build() {
+        var nw = [];
+        for (var i = 0; i < arr.length; i++) {
+          var dup = false,
+            v = arr[i];
+          steps.push({
+            i: i,
+            j: -1,
+            dup: false,
+            nw: nw.slice(),
+            line: 1,
+            msg:
+              "arr[" +
+              i +
+              "] = " +
+              v +
+              " তুললাম। শুরুতে ধরে নিলাম isDuplicate = false, মানে এখনো duplicate পাইনি।",
+          });
+          for (var j = 0; j < nw.length; j++) {
+            var same = v == nw[j];
+            if (same) {
+              dup = true;
+            }
+            steps.push({
+              i: i,
+              j: j,
+              dup: dup,
+              match: same,
+              nw: nw.slice(),
+              line: same ? 4 : 3,
+              msg: same
+                ? v +
+                  " == newArr[" +
+                  j +
+                  "] (" +
+                  nw[j] +
+                  "), মিলে গেছে! তাই isDuplicate = true।"
+                : v +
+                  " == newArr[" +
+                  j +
+                  "] (" +
+                  nw[j] +
+                  ")? মেলেনি, পরেরটা দেখি।",
+            });
+            if (same) {
+              steps.push({
+                i: i,
+                j: j,
+                dup: true,
+                match: true,
+                nw: nw.slice(),
+                line: 5,
+                msg:
+                  "break! পেয়ে গেছি, তাই ভেতরের লুপ এখানেই থামিয়ে দিলাম। বাকি " +
+                  (nw.length - j - 1) +
+                  "টা বাক্স আর দেখার দরকার নেই।",
+              });
+              break;
+            }
+          }
+          if (dup) {
+            steps.push({
+              i: i,
+              j: -1,
+              dup: true,
+              nw: nw.slice(),
+              line: 8,
+              msg: "isDuplicate true, তাই " + v + " newArr-এ যোগ করব না। বাদ।",
+            });
+          } else {
+            var before = nw.slice();
+            steps.push({
+              i: i,
+              j: -1,
+              dup: false,
+              nw: before,
+              line: 8,
+              msg:
+                "isDuplicate এখনো false, মানে " +
+                v +
+                " নতুন সংখ্যা। যোগ করার সময় হয়েছে।",
+            });
+            nw[nw.length] = v;
+            steps.push({
+              i: i,
+              j: -1,
+              dup: false,
+              nw: nw.slice(),
+              added: nw.length - 1,
+              line: 9,
+              msg:
+                "newArr[" +
+                (nw.length - 1) +
+                "] = " +
+                v +
+                "। পরের খালি বাক্সে (index = length = " +
+                (nw.length - 1) +
+                ") বসে গেল।",
+            });
+          }
+        }
+        steps.push({
+          i: -1,
+          j: -1,
+          dup: false,
+          nw: nw.slice(),
+          line: 12,
+          done: true,
+          msg:
+            "শেষ! document.write(newArr) পেজে লিখবে: " +
+            nw.join(",") +
+            " (array লিখলে কমার মাঝে স্পেস থাকে না)",
+        });
+      })();
+
+      var cur = 0,
+        timer = null;
+      var $ = function (id) {
+        return document.getElementById(id);
+      };
+      function box(v, idx, cls) {
+        return (
+          '<div class="cell"><div class="box ' +
+          cls +
+          '">' +
+          v +
+          '</div><div class="idx">' +
+          idx +
+          "</div></div>"
+        );
+      }
+      function render() {
+        var s = steps[cur],
+          h = "",
+          k;
+        for (k = 0; k < arr.length; k++)
+          h += box(arr[k], k, k == s.i ? "cur" : "");
+        $("arr").innerHTML = h;
+        h = "";
+        for (k = 0; k < s.nw.length; k++) {
+          var c = "";
+          if (k == s.added) c = "added";
+          else if (k == s.j) c = s.match ? "match" : "cmp";
+          h += box(s.nw[k], k, c);
+        }
+        if (!s.nw.length)
+          h = '<div class="cell"><div class="box empty">খালি</div></div>';
+        $("nw").innerHTML = h;
+        $("vars").innerHTML =
+          "<span>i = <b>" +
+          (s.i < 0 ? "-" : s.i) +
+          "</b></span><span>j = <b>" +
+          (s.j < 0 ? "-" : s.j) +
+          "</b></span><span>isDuplicate = <b>" +
+          s.dup +
+          "</b></span><span>newArr.length = <b>" +
+          s.nw.length +
+          "</b></span>";
+        $("msg").textContent = s.msg;
+        var c = "";
+        for (k = 0; k < codeLines.length; k++) {
+          var on =
+            k == s.line ||
+            (k == 0 && s.i >= 0 && s.j < 0 && s.line == 1 && false);
+          c +=
+            '<span class="ln' +
+            (on ? " on" : "") +
+            '">' +
+            codeLines[k].replace(/</g, "&lt;") +
+            "</span>";
+        }
+        $("code").innerHTML = c;
+        $("prev").disabled = cur == 0;
+        $("next").disabled = cur == steps.length - 1;
+        if (cur == steps.length - 1) stop();
+      }
+      function stop() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+          $("auto").textContent = "অটো প্লে";
+        }
+      }
+      function next() {
+        if (cur < steps.length - 1) {
+          cur++;
+          render();
+        }
+      }
+      $("next").onclick = function () {
+        stop();
+        next();
+      };
+      $("prev").onclick = function () {
+        stop();
+        if (cur > 0) {
+          cur--;
+          render();
+        }
+      };
+      $("reset").onclick = function () {
+        stop();
+        cur = 0;
+        render();
+      };
+      $("auto").onclick = function () {
+        if (timer) {
+          stop();
+          return;
+        }
+        if (cur == steps.length - 1) cur = 0;
+        $("auto").textContent = "থামাও";
+        timer = setInterval(next, 1200);
+        render();
+      };
+      render();
+    </script>
+  </body>
+</html>

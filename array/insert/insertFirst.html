@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insert First</title>
+  </head>
+  <body>
+    <script>
+      let arr = [10, 20, 30, 40];
+      let newEl = 50;
+      document.write(arr);
+
+      for (let index = arr.length - 1; index >= 0; index--) {
+        arr[index + 1] = arr[index];
+
+        if (index == 0) {
+          arr[index] = newEl;
+        }
+      }
+      document.write("<br>");
+      document.write(arr);
+    </script>
+  </body>
+</html>
