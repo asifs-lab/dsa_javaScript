@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linear Serach</title>
+  </head>
+  <body>
+    <script>
+      let arr = [10, 20, 30, 40];
+      let element = 30;
+      let found = -1;
+      let i = 0;
+
+      while (i < arr.length) {
+        if (arr[i] == element) {
+          found = i;
+          break;
+        }
+        i++;
+      }
+      if (found !== -1) {
+        document.write("Founded at " + i + " index");
+      } else {
+        document.write("Not founded");
+      }
+    </script>
+  </body>
+</html>

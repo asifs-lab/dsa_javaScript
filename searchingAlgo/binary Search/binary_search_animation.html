@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binary Search অ্যানিমেশন</title>
+<style>
+:root{
+  --bg:#f6f7f9;
+  --surface:#ffffff;
+  --neutral:#eceef2;
+  --text:#1c1f26;
+  --text2:#5b6270;
+  --muted:#8a91a0;
+  --border:#d5d9e1;
+  --accent-bg:#e3eefc;
+  --accent-border:#2f6fd0;
+  --accent-text:#1b4a96;
+  --ok-bg:#dcf3e4;
+  --ok-border:#2e9a57;
+  --ok-text:#16643a;
+  --warn-bg:#fdf0c9;
+  --warn-border:#d19a12;
+  --warn-text:#7a5600;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#15171c;
+    --surface:#1e2128;
+    --neutral:#272b34;
+    --text:#e8eaef;
+    --text2:#a3a9b6;
+    --muted:#757c8b;
+    --border:#3a3f4b;
+    --accent-bg:#1d3355;
+    --accent-border:#5b9bf0;
+    --accent-text:#a9ccfa;
+    --ok-bg:#17402a;
+    --ok-border:#4cc27c;
+    --ok-text:#a4e6bf;
+    --warn-bg:#4a3a0c;
+    --warn-border:#e3b53a;
+    --warn-text:#f6d98a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Hind Siliguri","Noto Sans Bengali","Segoe UI",system-ui,sans-serif;
+  line-height:1.6;
+  padding:24px 16px 48px;
+}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+.sub{color:var(--text2);font-size:14px;margin:0 0 20px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+label{font-size:14px;color:var(--text2)}
+select,button{
+  font:inherit;font-size:14px;color:var(--text);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:8px 14px;cursor:pointer;
+}
+button:hover,select:hover{border-color:var(--accent-border)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent-border);outline-offset:2px}
+#cells{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:20px}
+.cell{
+  height:48px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:17px;font-weight:600;background:var(--surface);
+  transition:background .25s,border-color .25s,opacity .25s;
+}
+.cell.in{background:var(--accent-bg);border-color:var(--accent-border)}
+.cell.out{opacity:.3}
+.cell.mid{border:2px solid var(--accent-border);background:var(--accent-bg);color:var(--accent-text)}
+.cell.hit{border:2px solid var(--ok-border);background:var(--ok-bg);color:var(--ok-text)}
+.lab{height:20px;text-align:center;font-size:12px;color:var(--accent-text);margin-top:4px;white-space:nowrap}
+.idx{text-align:center;font-size:11px;color:var(--muted)}
+#vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin:20px 0 16px}
+.var{background:var(--neutral);border-radius:8px;padding:8px 12px;border:1px solid transparent;transition:all .25s}
+.var.chg{background:var(--warn-bg);border-color:var(--warn-border)}
+.var .n{font-family:var(--mono);font-size:12px;color:var(--text2)}
+.var .v{font-size:20px;font-weight:600;margin-top:2px}
+.var.chg .n,.var.chg .v{color:var(--warn-text)}
+#msg{
+  min-height:56px;padding:12px 16px;border-radius:8px;
+  border:1px solid var(--border);background:var(--surface);
+  font-size:16px;
+}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+#count{margin-left:auto;align-self:center;font-size:13px;color:var(--text2)}
+#code{
+  background:var(--neutral);border-radius:8px;padding:10px 0;
+  font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;
+}
+.ln{white-space:pre;padding:0 14px;border-left:3px solid transparent}
+.ln.on{background:var(--accent-bg);border-left-color:var(--accent-border);color:var(--accent-text)}
+.ln i{font-style:normal;display:inline-block;width:26px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Binary Search অ্যানিমেশন</h1>
+  <p class="sub">প্রতিটা ধাপে কোন identifier এর মান বদলাচ্ছে, হলুদ বাক্সে দেখো।</p>
+
+  <div class="row">
+    <label for="t">target</label>
+    <select id="t">
+      <option value="60">60 (পাওয়া যাবে)</option>
+      <option value="10">10 (প্রথম দিকে)</option>
+      <option value="99">99 (পাওয়া যাবে না)</option>
+    </select>
+  </div>
+
+  <div id="cells"></div>
+  <div id="vars"></div>
+  <div id="msg" aria-live="polite"></div>
+
+  <div class="ctrl">
+    <button id="prev">পিছনে</button>
+    <button id="next">পরের ধাপ</button>
+    <button id="auto">অটো প্লে</button>
+    <button id="reset">রিসেট</button>
+    <span id="count"></span>
+  </div>
+
+  <div id="code"></div>
+</div>
+
+<script>
+var arr=[10,25,30,45,50,60,75];
+var codeLines=[
+'let arr = [10, 25, 30, 45, 50, 60, 75];',
+'let target = 60;',
+'let low = 0;',
+'let high = arr.length - 1;',
+'let found = -1;',
+'while (low <= high) {',
+'  let mid = Math.floor((low + high) / 2);',
+'  if (arr[mid] === target) {',
+'    found = mid;',
+'    break;',
+'  } else if (arr[mid] < target) {',
+'    low = mid + 1;',
+'  } else {',
+'    high = mid - 1;',
+'  }',
+'}',
+'if (found !== -1) {',
+'  console.log("পাওয়া গেছে, index: " + found);',
+'} else {',
+'  console.log("পাওয়া যায়নি");',
+'}'
+];
+var steps=[],cur=0,timer=null,target=60;
+
+function build(t){
+  steps=[];
+  var v={arr:'৭টি ঘর',target:null,low:null,high:null,mid:null,found:null};
+  function add(line,msg,ch){steps.push({line:line,msg:msg,ch:ch,v:Object.assign({},v)});}
+  add(1,'arr তৈরি হলো। এতে ৭টা সংখ্যা সাজানো আছে।',['arr']);
+  v.target=t;add(2,'target = '+t+'। এই সংখ্যাটাই খুঁজব।',['target']);
+  v.low=0;add(3,'low = 0। খোঁজা শুরু হবে প্রথম ঘর (index 0) থেকে।',['low']);
+  v.high=6;add(4,'high = 7 - 1 = 6। শেষ ঘরের index হলো ৬।',['high']);
+  v.found=-1;add(5,'found = -1। এখনও পাইনি, তাই -1 রাখলাম।',['found']);
+  var lo=0,hi=6;
+  while(true){
+    add(6,'low <= high? '+lo+' <= '+hi+' → '+(lo<=hi?'সত্য, লুপের ভেতরে ঢুকছি।':'মিথ্যা, লুপ শেষ। খোঁজার মতো ঘর আর নেই।'),[]);
+    if(lo>hi)break;
+    var raw=(lo+hi)/2,mid=Math.floor(raw);
+    v.mid=mid;
+    add(7,'mid = ('+lo+' + '+hi+') / 2 = '+raw+(raw===mid?'':' → দশমিক বাদ দিয়ে '+mid)+'। মাঝের ঘর index '+mid+'।',['mid']);
+    add(8,'arr['+mid+'] === target? '+arr[mid]+' === '+t+' → '+(arr[mid]===t?'হ্যাঁ!':'না।'),[]);
+    if(arr[mid]===t){
+      v.found=mid;add(9,'found = mid = '+mid+'। পেয়ে গেছি!',['found']);
+      add(10,'break দিয়ে লুপ থামালাম।',[]);
+      break;
+    }
+    if(arr[mid]<t){
+      add(11,'arr['+mid+'] < target? '+arr[mid]+' < '+t+' → হ্যাঁ। target ডান দিকে আছে।',[]);
+      lo=mid+1;v.low=lo;
+      add(12,'low = mid + 1 = '+lo+'। বাম পাশ পুরো বাদ।',['low']);
+    }else{
+      add(11,'arr['+mid+'] < target? '+arr[mid]+' < '+t+' → না।',[]);
+      add(13,'else ঢুকলাম। target বাম দিকে আছে।',[]);
+      hi=mid-1;v.high=hi;
+      add(14,'high = mid - 1 = '+hi+'। ডান পাশ পুরো বাদ।',['high']);
+    }
+  }
+  add(17,'found !== -1? '+v.found+' !== -1 → '+(v.found!==-1?'সত্য।':'মিথ্যা।'),[]);
+  if(v.found!==-1)add(18,'আউটপুট: পাওয়া গেছে, index: '+v.found,[]);
+  else add(20,'আউটপুট: পাওয়া যায়নি',[]);
+}
+
+function render(){
+  var s=steps[cur],v=s.v,i,h='';
+  for(i=0;i<7;i++){
+    var c='cell';
+    if(v.low!==null&&v.high!==null){
+      if(i>=v.low&&i<=v.high)c+=' in';else c+=' out';
+    }
+    var showMid=v.mid!==null&&i===v.mid&&s.line>=7&&s.line<=14;
+    if(showMid)c+=' mid';
+    if(i===v.found)c+=' hit';
+    var lab=[];
+    if(i===v.low)lab.push('low');
+    if(showMid)lab.push('mid');
+    if(i===v.high)lab.push('high');
+    h+='<div><div class="'+c+'">'+arr[i]+'</div><div class="lab">'+lab.join(', ')+'</div><div class="idx">index '+i+'</div></div>';
+  }
+  document.getElementById('cells').innerHTML=h;
+  var names=['arr','target','low','high','mid','found'],vh='';
+  for(i=0;i<names.length;i++){
+    var n=names[i],val=v[n];
+    vh+='<div class="var'+(s.ch.indexOf(n)>-1?' chg':'')+'"><div class="n">'+n+'</div><div class="v">'+(val===null?'—':val)+'</div></div>';
+  }
+  document.getElementById('vars').innerHTML=vh;
+  document.getElementById('msg').textContent=s.msg;
+  var ch='';
+  for(i=0;i<codeLines.length;i++){
+    var t=codeLines[i];
+    if(i===1)t='let target = '+target+';';
+    ch+='<div class="ln'+(i+1===s.line?' on':'')+'"><i>'+(i+1)+'</i>'+t.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';
+  }
+  document.getElementById('code').innerHTML=ch;
+  document.getElementById('count').textContent='ধাপ '+(cur+1)+' / '+steps.length;
+}
+
+function stopAuto(){
+  if(timer){clearInterval(timer);timer=null;}
+  document.getElementById('auto').textContent='অটো প্লে';
+}
+function reset(){stopAuto();cur=0;render();}
+
+document.getElementById('next').onclick=function(){stopAuto();if(cur<steps.length-1){cur++;render();}};
+document.getElementById('prev').onclick=function(){stopAuto();if(cur>0){cur--;render();}};
+document.getElementById('reset').onclick=reset;
+document.getElementById('auto').onclick=function(){
+  if(timer){stopAuto();return;}
+  if(cur>=steps.length-1)cur=0;
+  render();
+  this.textContent='থামাও';
+  timer=setInterval(function(){
+    if(cur<steps.length-1){cur++;render();}
+    else stopAuto();
+  },1500);
+};
+document.getElementById('t').onchange=function(){
+  target=parseInt(this.value,10);build(target);reset();
+};
+
+build(target);
+render();
+</script>
+</body>
+</html>
